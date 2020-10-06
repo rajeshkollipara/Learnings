@@ -63,3 +63,60 @@ example(of: "tryMap") {
               receiveValue: { print($0) })
         .store(in: &subscriptions)
 }
+
+example(of: "flatMap") {
+    let charlotte = Chatter(name: "Charlotte", message: "Hi, I'm Charlotte!")
+    let james = Chatter(name: "James", message: "Hi, I'm James!")
+    let chat = CurrentValueSubject<Chatter, Never>(charlotte)
+    //    chat
+    //        .sink(receiveValue: { print($0.message.value) })
+    //        .store(in: &subscriptions)
+    //    charlotte.message.value = "Hi again"
+    //    chat.value = james
+    
+    chat
+        .flatMap(maxPublishers: .max(2)) { $0.message }
+        .sink(receiveValue: { print($0) })
+        .store(in: &subscriptions)
+    charlotte.message.value = "Hi again"
+    chat.value = james
+    james.message.value = "James: Doing great. You?"
+    charlotte.message.value = "Charlotte again"
+    
+    let morgan = Chatter(name: "Morgan",
+                         message: "Hey guys, what are you up to?")
+    chat.value = morgan
+    charlotte.message.value = "Hi again again"
+}
+
+example(of: "replaceNil") {
+    ["A", nil, "C"].publisher
+        .replaceNil(with: "-")
+        .map{ $0! }
+        .sink(receiveValue: { print($0) })
+        .store(in: &subscriptions)
+}
+
+example(of: "replaceEmpty(with:)") {
+    
+    let empty = Empty<Int, Never>()
+    empty.replaceEmpty(with: 1)
+        .sink(receiveCompletion: { print($0) },
+              receiveValue: { print($0) })
+        .store(in: &subscriptions)
+}
+
+example(of: "scan") {
+    var dailyGainLoss: Int { .random(in: -10...10) }
+    let august2019 = (0..<22)
+        .map { _ in dailyGainLoss }
+    let tempPublisher =     august2019.publisher
+    tempPublisher
+        .scan(50) { latest, current in
+            max(0, latest + current)
+        }
+        .sink(receiveValue: { _ in  })
+        .store(in: &subscriptions)
+}
+
+
