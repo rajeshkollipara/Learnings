@@ -3,14 +3,8 @@
 import Foundation
 import Combine
 
-public func example(of description: String,
-                    action: () -> Void) {
-    print("\n------------------------\(description)----------------------------------\n")
-    action()
-    
-}
-
 var subscriptions = Set<AnyCancellable>()
+//Transform Operators
 example(of: "collect") {
     ["A", "B", "C", "D", "E"].publisher.collect()
         .sink(receiveCompletion: { print($0) },
@@ -119,4 +113,44 @@ example(of: "scan") {
         .store(in: &subscriptions)
 }
 
+//Filer Operators
+example(of: "filter") {
+    let numbers = (1...10).publisher
+    numbers
+        .filter { $0.isMultiple(of: 2) }
+        .sink(receiveValue: { n in
+            print("\(n) is a multiple of 2!")
+        })
+        .store(in: &subscriptions)
+}
 
+example(of: "removeDuplicates") {
+    let words = "hey hey there! want to listen to mister mister ?"
+        .components(separatedBy: " ")
+        .publisher
+    words
+        .removeDuplicates()
+        .sink(receiveValue: {
+            print($0)
+        })
+        .store(in: &subscriptions)
+}
+
+example(of: "compactMap") {
+    let strings = ["a", "1.24", "3", "def", "45", "0.23"].publisher
+    strings
+        .compactMap { Float($0) }
+        .sink(receiveValue: {
+            print($0)
+        })
+        .store(in: &subscriptions)
+}
+
+example(of: "ignoreOutput") {
+    let numbers = (1...10_000).publisher
+    numbers
+        .ignoreOutput()
+        .sink(receiveCompletion: { print("Completed with: \($0)") },
+              receiveValue: { print($0) })
+        .store(in: &subscriptions)
+}
