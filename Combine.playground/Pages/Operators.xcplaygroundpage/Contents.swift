@@ -232,19 +232,46 @@ example(of: "drop(untilOutputFrom:)") {
 }
 
 example(of: "prefix") {
-  let numbers = (1...10).publisher
-  numbers
-    .prefix(2)
-    .sink(receiveCompletion: { print("Completed with: \($0)") },
-          receiveValue: { print($0) })
-    .store(in: &subscriptions)
+    let numbers = (1...10).publisher
+    numbers
+        .prefix(2)
+        .sink(receiveCompletion: { print("Completed with: \($0)") },
+              receiveValue: { print($0) })
+        .store(in: &subscriptions)
 }
 
 example(of: "prefix(while:)") {
-  let numbers = (1...10).publisher
-  numbers
-    .prefix(while: { $0 < 3 })
-    .sink(receiveCompletion: { print("Completed with: \($0)") },
-          receiveValue: { print($0) })
-    .store(in: &subscriptions)
+    let numbers = (1...10).publisher
+    numbers
+        .prefix(while: { $0 < 3 })
+        .sink(receiveCompletion: { print("Completed with: \($0)") },
+              receiveValue: { print($0) })
+        .store(in: &subscriptions)
+}
+
+example(of: "prefix(untilOutputFrom:)") {
+    let isReady = PassthroughSubject<Void, Never>()
+    let taps = PassthroughSubject<Int, Never>()
+    taps
+        .prefix(untilOutputFrom: isReady)
+        .sink(receiveCompletion: { print("Completed with: \($0)") },
+              receiveValue: { print($0) })
+        .store(in: &subscriptions)
+    (1...5).forEach { n in
+        taps.send(n)
+        
+        if n == 2 {
+            isReady.send()
+        }
+    }
+}
+
+example(of: "Challenge") {
+    let numbers = (1...100).publisher
+    numbers.dropFirst(50)
+        .prefix(20)
+        .filter({ $0%2 == 0 })
+        .sink(receiveCompletion: { print("Completed with: \($0)") },
+              receiveValue: { print($0) })
+        .store(in: &subscriptions)
 }
