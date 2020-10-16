@@ -4,5 +4,6 @@
         <page name='Introduction'/>
         <page name='Publishers'/>
         <page name='Operators'/>
+        <page name='TimeShiftOperators'/>
     </pages>
 </playground>
