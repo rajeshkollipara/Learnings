@@ -5,5 +5,6 @@
         <page name='Publishers'/>
         <page name='Operators'/>
         <page name='TimeShiftOperators'/>
+        <page name='SequenceOperators'/>
     </pages>
 </playground>
